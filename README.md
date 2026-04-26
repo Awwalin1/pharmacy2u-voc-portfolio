@@ -67,4 +67,5 @@ The "Working" rows are functional with passing tests. The "Planned" rows are sco
 
 ## About the author
 
-Adewale Adekola - MSc Data Science (Distinction), University of Wolverhampton. Currently a Customer Consultant in Collections and Affordability Analytics at Orbit Credit Services (United Utilities Division). Co-founder and Insight Data Scientist at CleverFolks.ai, where I integrated Anthropic Claude Haiku into a production LLM-based text classification pipeline for UK social housing compliance triage.
+Adewale Adekola - MSc Data Science (Distinction), University of Wolverhampton. Currently an Insight Data Scientist at CleverFolks.
+
