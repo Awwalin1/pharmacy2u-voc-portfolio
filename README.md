@@ -14,61 +14,57 @@ The job description names eleven core responsibilities. The repository addresses
 
 | JD Responsibility | Module | Status |
 | --- | --- | --- |
-| Develop and apply NLP models for intent classification | `methodology_demo/classifier/` | Working |
-| Work with transformer-based models and text embeddings | `methodology_demo/embeddings/` | Working |
-| Build and maintain an end-to-end customer insights pipeline | `methodology_demo/scripts/` | Working |
-| Classify customer contacts by intent, topic, and root cause | `methodology_demo/classifier/` (rule-based + k-NN ensemble) | Working |
-| Track patient satisfaction signals across channels | Sentiment scoring layer | In progress |
+| Develop and apply NLP models for intent classification | methodology_demo/classifier/ | Working |
+| Topic extraction (BERTopic) | methodology_demo/topics/ | Working |
+| Sentiment analysis | methodology_demo/sentiment/ | Planned |
+| Work with transformer-based models and text embeddings | methodology_demo/embeddings/ | Working |
+| Build and maintain an end-to-end customer insights pipeline | methodology_demo/scripts/ | Working |
+| Classify customer contacts by intent, topic, and root cause | methodology_demo/classifier/ plus methodology_demo/topics/ | Working |
+| Track patient satisfaction signals across channels | Sentiment scoring layer | Planned |
 | Analyse contact types suitable for self-service or proactive comms | Deflection analysis | Planned |
 | Produce regular insight outputs | Streamlit dashboard | Planned |
-| Define and maintain an intent taxonomy and query-pattern knowledge base | `methodology_demo/spec/intent_taxonomy.md` | Working |
-| Link customer contact data to CRM and patient records | Architecture diagram + schema | Planned |
-| Working with messy, real-world text data | `methodology_demo/preprocessing/` (channel-aware) | Working |
-| Cloud ML platform exposure | Deployment artifacts | Planned |
+| Define and maintain an intent taxonomy and query-pattern knowledge base | methodology_demo/spec/intent_taxonomy.md plus embedding similarity search | Working |
+| Link customer contact data to CRM and patient records | SQLite mock + retention correlation | Planned |
+| Working with messy, real-world text data | methodology_demo/preprocessing/ (channel-aware) | Working |
+| Cloud ML platform exposure (beneficial) | Deployment artifacts | Planned |
 
-The "Working" rows are functional with passing tests. The "Planned" rows are scoped in this README and will be added across the coming evenings.
+The "Working" rows are functional with passing tests. The "Planned" rows are scoped in this README and being added across the build sequence.
 
 ## Repository structure
 
+- methodology_demo/spec/intent_taxonomy.md
+- methodology_demo/data/ (synthetic_contacts.jsonl, cleaned_contacts.jsonl)
+- methodology_demo/scripts/ (synthetic_contact_generator, run_preprocessing, run_embeddings, run_classification, run_topics)
+- methodology_demo/preprocessing/ (channel_aware.py + 23 passing tests)
+- methodology_demo/embeddings/ (embedder.py, similarity.py)
+- methodology_demo/classifier/ (rule_based.py, nearest_neighbour.py + 22 passing tests)
+- methodology_demo/topics/ (bertopic_modeller.py)
+- trustpilot/README.md (scope note)
+
 ## How the pipeline runs end-to-end
-
-Three scripts run in sequence, each consuming the previous one's output:
-
-```bash
-# 1. Generate synthetic contacts (writes data/synthetic_contacts.jsonl)
-python methodology_demo/scripts/synthetic_contact_generator.py
-
-# 2. Apply channel-aware preprocessing (writes data/cleaned_contacts.jsonl)
-python methodology_demo/scripts/run_preprocessing.py
-
-# 3. Run intent classification (rule-based + k-NN with disagreement analysis)
-python methodology_demo/scripts/run_classification.py
-
-# Optional: similarity search demo
-python methodology_demo/scripts/run_embeddings.py
-```
 
 ## Key design decisions
 
-**Channel-aware preprocessing.** The same intent surfaces differently across channels - phone calls have disfluencies and emotional openers, emails have signatures and salutations, chat is fragmented and abbreviation-heavy, social posts have @-handles and hashtags. A single preprocessing step would either over-clean structured email or leave phone disfluencies in place. The module dispatches to channel-specific cleaners.
+**Channel-aware preprocessing.** The same intent surfaces differently across channels - phone calls have disfluencies and emotional openers, emails have signatures and salutations, chat is fragmented and abbreviation-heavy, social posts have @-handles and hashtags. The module dispatches to channel-specific cleaners.
 
-**Two complementary classifiers.** The rule-based classifier achieves 93.8% accuracy where it fires but only covers 80% of contacts (the rest fall below the confidence threshold and are returned as `None` - "needs human triage"). The k-NN classifier closes the coverage gap using semantic similarity over sentence-transformer embeddings. The run script reports disagreements between the two, which surface multi-intent contacts and edge cases worth human review. In production this would be ensembled: rule-based as the high-precision layer, k-NN as the recall layer for unmatched contacts.
+**Two complementary classifiers.** The rule-based classifier achieves 93.8% accuracy where it fires but only covers 80% of contacts. The k-NN classifier closes the coverage gap using semantic similarity over sentence-transformer embeddings. The run script reports disagreements between the two, which surface multi-intent contacts and edge cases worth human review.
 
-**Synthetic data with prominent disclaimers.** Every output file carries a top-of-file disclaimer header. The synthetic data demonstrates pipeline structure and taxonomy - it is not used to train models, no findings are reported from it, and placeholder identifiers (`Customer_A001` etc.) are deliberately non-realistic.
+**Supervised intents validated by unsupervised topics.** The BERTopic module clusters the same corpus without reference to the hand-coded intent labels, then the run script cross-tabulates discovered topics against intents. On the synthetic corpus, three of six discovered topics align cleanly with single intents while the others surface lexical superclusters that span multiple intents.
+
+**Synthetic data with prominent disclaimers.** Every output file carries a top-of-file disclaimer header. The synthetic data demonstrates pipeline structure and taxonomy only.
 
 ## Test coverage
 
-```bash
-python -m pytest methodology_demo/ -v
-```
-
-45 tests pass: 23 covering channel-aware preprocessing, 22 covering the rule-based classifier across all eight intents, threshold behaviour, and diagnostic confidence scoring.
+45 tests pass: 23 for channel-aware preprocessing, 22 for the rule-based classifier.
 
 ## What is intentionally not in this repository
 
-**Real Pharmacy2U contact data.** The role works with internal CRM-held contacts; this repository works with synthetic illustrative data. Real-data validation of the underlying methodology is provided in the dissertation (linked above).
+**Real Pharmacy2U contact data.** Real-data validation of the underlying methodology is provided in the dissertation linked above.
 
-**A Trustpilot scrape of Pharmacy2U public reviews.** Originally scoped, found to be blocked by Cloudflare on every approach attempted (`requests`, headless Playwright, `cloudscraper`). See `trustpilot/README.md` for the full scope note. A paid scraping service like ScrapingBee would resolve this in production but is out of scope for a personal portfolio build.
+**A Trustpilot scrape of Pharmacy2U public reviews.** See trustpilot/README.md for the scope note explaining the Cloudflare anti-bot constraint.
 
-**Findings about Pharmacy2U operational reality.** The classifier accuracy and similarity scores reported in script outputs reflect performance on synthetic data only. They demonstrate that the methodology runs end-to-end; they do not characterise real customer contact patterns.
+**Findings about Pharmacy2U operational reality.** All numbers in script outputs reflect performance on synthetic data only.
 
+## About the author
+
+Adewale Adekola - MSc Data Science (Distinction), University of Wolverhampton. Currently a Customer Consultant in Collections and Affordability Analytics at Orbit Credit Services (United Utilities Division). Co-founder and Insight Data Scientist at CleverFolks.ai, where I integrated Anthropic Claude Haiku into a production LLM-based text classification pipeline for UK social housing compliance triage.
