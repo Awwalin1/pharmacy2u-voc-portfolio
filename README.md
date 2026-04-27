@@ -16,11 +16,11 @@ The job description names eleven core responsibilities. The repository addresses
 | --- | --- | --- |
 | Develop and apply NLP models for intent classification | methodology_demo/classifier/ | Working |
 | Topic extraction (BERTopic) | methodology_demo/topics/ | Working |
-| Sentiment analysis | methodology_demo/sentiment/ | Planned |
+| Sentiment analysis | methodology_demo/sentiment/ | Working |
 | Work with transformer-based models and text embeddings | methodology_demo/embeddings/ | Working |
 | Build and maintain an end-to-end customer insights pipeline | methodology_demo/scripts/ | Working |
 | Classify customer contacts by intent, topic, and root cause | methodology_demo/classifier/ plus methodology_demo/topics/ | Working |
-| Track patient satisfaction signals across channels | Sentiment scoring layer | Planned |
+| Track patient satisfaction signals across channels | Sentiment scoring layer | Working |
 | Analyse contact types suitable for self-service or proactive comms | Deflection analysis | Planned |
 | Produce regular insight outputs | Streamlit dashboard | Planned |
 | Define and maintain an intent taxonomy and query-pattern knowledge base | methodology_demo/spec/intent_taxonomy.md plus embedding similarity search | Working |
